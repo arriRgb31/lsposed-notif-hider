@@ -1,0 +1,8 @@
+id=arri.lsposed.notifhider
+name=Notif Icon Hider (SystemUI)
+version=0.1
+versionCode=1
+author=arriRgb31
+description=LSPosed module kecil untuk mengontrol visibilitas ikon notifikasi di SystemUI. Target: Realme C series (mungkin kompatibel AOSP lain)
+minApi=31
+maxApi=36
