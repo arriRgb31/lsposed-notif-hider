@@ -1,1 +1,0 @@
--keep class arri.lsposed.notifhider.** { *; }

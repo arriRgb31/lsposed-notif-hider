@@ -1,37 +1,44 @@
-# LSPosed Notification Hider (SystemUI)
+# Notif Color Icon
 
-## Kegunaan
-Module LSPosed kecil untuk mengontrol ikon notifikasi aplikasi di status bar (notification icons) pada SystemUI. Fokus utamanya: menyembunyikan/tampilkan ikon notifikasi per aplikasi atau global sesuai kebutuhan.
+Module LSPosed kecil untuk **memaksa setiap notifikasi memakai ikon aplikasi asli (berwarna)** — di status bar maupun di panel notifikasi (shade) — sebagai ganti ikon `small icon` monokrom yang di-tint.
 
-Tujuannya agar ikon notifikasi di status bar bisa dikontrol (hide/show) tanpa mengubah warna monochrome (bukan tweak monochrome, bukan AOSP "icon color" tweak).
+## Apa ini
 
-## Target Device
-- Realme C series (Realme C53/C series)
-- Kemungkinan kompatibel dengan ROM AOSP-based lain (tergantung struktur SystemUI)
+Cuma **satu file APK kecil** yang nge-hook ke **SystemUI** (`com.android.systemui`).
 
-## Dibutuhkan
-- LSPosed / JingMatrix (dibutuhkan untuk method hooking)
-- Aplikasi target terinstall
-- SystemUI sebagai scope (sudah diset di `xposed_scope`)
+- Tidak ada service.
+- Tidak minta permission.
+- Tidak mengirim data keluar.
+- Tidak mengubah file sistem.
+- Semua kerja hanya di dalam proses SystemUI saat notifikasi dirender.
 
-## Struktur
-- `app/src/main/java/arri/lsposed/notifhider/XposedInit.java` - entry hook SystemUI
-- `module.prop` - info module LSPosed
-- `AndroidManifest.xml` - deklarasi xposed + scope
-- `res/values/arrays.xml` - scope `com.android.systemui`
+## Kenapa perlu
 
-## Implementasi (rencana)
-Hook class-class SystemUI terkait notification icons:
-- `com.android.systemui.statusbar.phone.NotificationIconAreaController`
-- `com.android.systemui.statusbar.StatusBarIconView`
-- `com.android.systemui.statusbar.phone.IconMerger` (jika ada)
-- atau class terkait `NotificationIconContainer`
+Android / AOSP menampilkan notifikasi memakai *small icon* (ikon putih monokrom yang diwarnai otomatis oleh sistem). Akibatnya ikon notifikasi sering tidak mirip aplikasi pengirimnya. Beberapa ROM (mis. realme UI / Heytap) menampilkan sebagian ikon berwarna, sebagian monokrom — jadi campur.
 
-Tujuannya: mengontrol visibility (setVisibility/GONE/VISIBLE) untuk ikon notifikasi aplikasi di status bar. Bukan mengubah tint/color jadi monochrome.
+Module ini menyeragamkan: **setiap notifikasi tampil dengan ikon aplikasi pengirimnya**, baik di status bar maupun di baris notifikasi (shade).
 
-## Build
-Build pakai Android Studio / gradle. Hasilkan `.apk` lalu install + enable di LSPosed/JingMatrix, reboot/restart SystemUI sesuai kebutuhan.
+## Tujuan & dukungan perangkat
 
-## Link
-- JingMatrix (dibutuhkan untuk hook): https://github.com/JingMatrix/LSPosed
-- LSPosed: https://github.com/LSPosed/LSPosed
+- Dikembangkan & diuji di **Android 15**, basis **AOSP + komponen OEM (realme UI 15)** — contoh: **Realme C53 (RMX3760)**.
+- Menyasar kelas SystemUI standar AOSP, jadi **berpeluang jalan di device AOSP-based Android 12–15 lain** (termasuk ROM GO / AOSP ringan).
+- **Tidak dijamin** untuk OEM yang mengganti/menghapus kelas SystemUI-nya. Kalau tidak jalan, cek log LSPosed dengan tag modul.
+
+## Persyaratan
+
+- Root + **LSPosed / Vector**
+- Android **12+** (diuji di 15)
+- Scope: **`com.android.systemui`**
+
+## Cara install
+
+1. Install `notif-color-icon.apk`.
+2. Buka LSPosed → aktifkan module ini.
+3. Pastikan scope `com.android.systemui` tercentang.
+4. Restart SystemUI / reboot.
+
+## Ingin tahu isinya?
+
+Source tidak dipublikasikan. Kalau penasaran, silakan decompile APK-nya sendiri.
+
+Package: `com.arxxcc.notificon`
