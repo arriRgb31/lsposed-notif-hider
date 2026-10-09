@@ -1,44 +1,55 @@
 # Notif Color Icon
 
-Module LSPosed kecil untuk **memaksa setiap notifikasi memakai ikon aplikasi asli (berwarna)** — di status bar maupun di panel notifikasi (shade) — sebagai ganti ikon `small icon` monokrom yang di-tint.
+Modul LSPosed yang membuat setiap notifikasi memakai **ikon asli aplikasi pengirim (berwarna)** — di status bar maupun di shade.
 
-## Apa ini
+## Latar belakang
 
-Cuma **satu file APK kecil** yang nge-hook ke **SystemUI** (`com.android.systemui`).
+Di Android 15 basis AOSP (termasuk realme UI / realme seri GO), ikon notifikasi di status bar dan shade dirender lewat `com.android.internal.widget.CachingIconView` dan `NotificationRowIconView`.
 
-- Tidak ada service.
-- Tidak minta permission.
-- Tidak mengirim data keluar.
-- Tidak mengubah file sistem.
-- Semua kerja hanya di dalam proses SystemUI saat notifikasi dirender.
+Untuk notifikasi yang menyetel `color` (umpama WhatsApp, Tokopedia), SystemUI memanggil `setOriginalIconColor()` dan `setGrayedOut()`, yang menjalankan:
 
-## Kenapa perlu
+```
+drawable.mutate().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+```
 
-Android / AOSP menampilkan notifikasi memakai *small icon* (ikon putih monokrom yang diwarnai otomatis oleh sistem). Akibatnya ikon notifikasi sering tidak mirip aplikasi pengirimnya. Beberapa ROM (mis. realme UI / Heytap) menampilkan sebagian ikon berwarna, sebagian monokrom — jadi campur.
+Akibatnya ikon jadi monokrom/kelabu. Notifikasi yang tidak menyetel `color` (umpama Glints) tidak di-tint, jadi tetap berwarna. Hasilnya tampilan ikon tidak konsisten per aplikasi/notifikasi — sebagian berwarna, sebagian putih/kelabu. Paling kelihatan pada notifikasi grup yang di-expand.
 
-Module ini menyeragamkan: **setiap notifikasi tampil dengan ikon aplikasi pengirimnya**, baik di status bar maupun di baris notifikasi (shade).
+## Yang dilakukan modul
 
-## Tujuan & dukungan perangkat
+- Scope ke `com.android.systemui`.
+- Mengambil package pengirim dari notifikasi: `Notification.extras["android.appInfo"]` → `ApplicationInfo.packageName`.
+- Mengganti drawable ikon (`StatusBarIconView`, `CachingIconView`, `NotificationRowIconView`) dengan `PackageManager.getApplicationIcon(pkg)` — di status bar dan shade, termasuk baris notifikasi grup.
+- Menghapus color filter yang dipasang `setOriginalIconColor()` / `setGrayedOut()` agar ikon berwarna tidak ikut di-mono-kan.
 
-- Dikembangkan & diuji di **Android 15**, basis **AOSP + komponen OEM (realme UI 15)** — contoh: **Realme C53 (RMX3760)**.
-- Menyasar kelas SystemUI standar AOSP, jadi **berpeluang jalan di device AOSP-based Android 12–15 lain** (termasuk ROM GO / AOSP ringan).
-- **Tidak dijamin** untuk OEM yang mengganti/menghapus kelas SystemUI-nya. Kalau tidak jalan, cek log LSPosed dengan tag modul.
+Modul **tidak** melakukan "monet" / themed icon. Yang dipakai adalah ikon asli aplikasi (berwarna), bukan ikon yang disesuaikan ke tema.
+
+## Sifat
+
+- Hanya APK kecil. Tanpa service, tanpa permission, tanpa akses jaringan/storage.
+- Bekerja in-process di SystemUI saat notifikasi dirender.
+
+## Kompatibilitas
+
+- Dikembangkan & diuji: Android 15 AOSP + realme UI (Realme C53 / RMX3760).
+- Menyasar kelas SystemUI standar AOSP, jadi berpeluang jalan di AOSP-based Android 12–15 lain (termasuk ROM GO / AOSP ringan).
+- Tidak dijamin pada OEM yang mengubah atau menghapus kelas SystemUI tersebut.
 
 ## Persyaratan
 
-- Root + **LSPosed / Vector**
-- Android **12+** (diuji di 15)
-- Scope: **`com.android.systemui`**
+- Root + LSPosed / Vector
+- Scope: `com.android.systemui`
 
-## Cara install
+## Install
 
-1. Install `notif-color-icon.apk`.
-2. Buka LSPosed → aktifkan module ini.
-3. Pastikan scope `com.android.systemui` tercentang.
+1. Unduh APK dari halaman **Releases**.
+2. Install APK.
+3. Buka LSPosed, aktifkan modul ini, pastikan scope `com.android.systemui` tercentang.
 4. Restart SystemUI / reboot.
 
-## Ingin tahu isinya?
+## Unduh
 
-Source tidak dipublikasikan. Kalau penasaran, silakan decompile APK-nya sendiri.
+APK tersedia di halaman Releases: <https://github.com/arriRgb31/lsposed-notif-hider/releases/latest>
 
 Package: `com.arxxcc.notificon`
+
+Source tidak dipublikasikan.
