@@ -12,16 +12,55 @@ public class XposedInit implements IXposedHookLoadPackage {
         if (!"com.android.systemui".equals(lpparam.packageName)) {
             return;
         }
-        XposedBridge.log("NotifIconHider: Hooking SystemUI - " + lpparam.versionName);
-        // TODO: Hook NotificationIconArea/IconMerger/StatusBarIconView as needed
-        // Example (safe placeholder): try to hook common methods if present
-        try {
-            Class<?> cls = XposedHelpers.findClassIfExists("com.android.systemui.statusbar.phone.NotificationIconAreaController", lpparam.classLoader);
-            if (cls != null) {
-                XposedBridge.log("NotifIconHider: Found NotificationIconAreaController");
-            }
-        } catch (Throwable t) {
-            XposedBridge.log("NotifIconHider: " + t.getMessage());
+        XposedBridge.log("NotifIconHider: Hooking com.android.systemui");
+
+        // Try NotificationIconAreaController
+        Class<?> iconArea = XposedHelpers.findClassIfExists(
+                "com.android.systemui.statusbar.phone.NotificationIconAreaController",
+                lpparam.classLoader);
+        if (iconArea != null) {
+            XposedBridge.log("NotifIconHider: Found NotificationIconAreaController");
+            // Common method: updateIcons / addNotification / updateState
+            try {
+                XposedHelpers.findAndHookMethod(iconArea, "updateIcons", new XC_MethodHook() {
+                    @Override
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                        // Placeholder: inspect if needed
+                    }
+                });
+            } catch (Throwable ignored) {}
+        }
+
+        // Try StatusBarIconView
+        Class<?> iconView = XposedHelpers.findClassIfExists(
+                "com.android.systemui.statusbar.StatusBarIconView",
+                lpparam.classLoader);
+        if (iconView != null) {
+            XposedBridge.log("NotifIconHider: Found StatusBarIconView");
+            try {
+                XposedHelpers.findAndHookMethod(iconView, "setVisibleState", int.class, boolean.class, new XC_MethodHook() {
+                    @Override
+                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                        // TODO: filter by notification info if needed
+                    }
+                });
+            } catch (Throwable ignored) {}
+        }
+
+        // Try IconMerger
+        Class<?> iconMerger = XposedHelpers.findClassIfExists(
+                "com.android.systemui.statusbar.phone.IconMerger",
+                lpparam.classLoader);
+        if (iconMerger != null) {
+            XposedBridge.log("NotifIconHider: Found IconMerger");
+        }
+
+        // Try NotificationIconContainer
+        Class<?> iconContainer = XposedHelpers.findClassIfExists(
+                "com.android.systemui.statusbar.phone.NotificationIconContainer",
+                lpparam.classLoader);
+        if (iconContainer != null) {
+            XposedBridge.log("NotifIconHider: Found NotificationIconContainer");
         }
     }
 }
